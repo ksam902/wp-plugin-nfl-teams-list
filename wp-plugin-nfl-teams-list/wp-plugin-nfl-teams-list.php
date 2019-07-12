@@ -23,23 +23,42 @@ class NFL_Teams_List_Plugin {
         $this->api_key = get_option('nfl_teams_list_settings_api_key');
     }
 
-    function nfl_teams_list_scripts() {
+    function nfl_teams_list_scripts() {   
 
-        // DEV-NOTE : Custom CSS.
-        // wp_register_style( 'namespace', 'http://locationofcss.com/mycss.css' );
-        // wp_enqueue_style( 'namespace' );
+        
 
         wp_register_style( 'nfl_teams_list_datatables_css', 'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css' );
         wp_enqueue_style( 'nfl_teams_list_datatables_css' );
 
         wp_enqueue_style( 'nfl_teams_list_jquery' );
-        wp_enqueue_script( 'nfl_teams_list_jquery', 'https://code.jquery.com/jquery-3.4.1.min.js', array( 'jquery' ) );
+        wp_enqueue_script( 'nfl_teams_list_jquery', 'https://code.jquery.com/jquery-3.3.1.js', array( 'jquery' ) );
 
         wp_register_script( 'nfl_teams_list_datatables_js', 'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js');
         wp_enqueue_script('nfl_teams_list_datatables_js');
 
-        wp_register_script( 'nfl_teams_list_script', plugins_url('wp-plugin-nfl-teams-list.js',__FILE__ ));
-        wp_enqueue_script('nfl_teams_list_script');
+        // BOOTSTRAP
+        // wp_register_style( 'nfl_teams_list_bootstrap', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css' );
+        // wp_enqueue_style( 'nfl_teams_list_bootstrap' );
+
+        // wp_register_style( 'nfl_teams_list_bootstrap_datatables', 'https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css' );
+        // wp_enqueue_style( 'nfl_teams_list_bootstrap_datatables' );
+
+        // wp_register_script( 'nfl_teams_list_popper_js', 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js');
+        // wp_enqueue_script('nfl_teams_list_popper_js');
+
+        // wp_register_script( 'nfl_teams_list_bootstrap_js', 'https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js');
+        // wp_enqueue_script('nfl_teams_list_bootstrap_js');
+
+
+
+        // Custom CSS file.
+        wp_register_style( 'nfl_teams_list_style_css', plugins_url('wp-plugin-nfl-teams-list.css',__FILE__ ) );
+        wp_enqueue_style( 'nfl_teams_list_style_css' );
+
+        // Custom JS file.
+        wp_register_script( 'nfl_teams_list_script_js', plugins_url('wp-plugin-nfl-teams-list.js',__FILE__ ));
+        wp_enqueue_script('nfl_teams_list_script_js');
+       
     }
 
 
@@ -138,33 +157,59 @@ class NFL_Teams_List_Plugin {
     */
     function shortcode_nfl_teams_list($atts, $content = null){
         extract( shortcode_atts( array(
-            'id'       => 'id',
+            'title'       => 'title',
+            'style'       => 'style'
         ), $atts ) );
 
-        $id = esc_attr($id);
+        $title = esc_attr($title);
+        $style = esc_attr($style);
+
+
+        // DEV-NOTE REMOVE
+
+
+        // if (empty($style)) {
+        //     $style = 'default';
+        // }
+
+        // $available_styles = array(
+        //     'bootstrap' => array(
+        //         'table-class' => 'class="table table-striped table-bordered" style="width:100%"'
+        //     ),
+        //     'default' => array(
+        //         'table-class' => 'class="" style="width:100%"'
+        //     )
+        // );
    
+
+        // var_dump($available_styles[$style]["table-class"]);
+        // die('die');
+
         if (!empty($this->api_key)) {       
 
             $request = curl_init('http://delivery.chalk247.com/team_list/NFL.JSON?api_key=' . $this->api_key);                                                                      
             curl_setopt($request, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($request, CURLOPT_ENCODING, '');
             curl_setopt($request, CURLOPT_POSTREDIR, 3);                                                                  
             curl_setopt($request, CURLOPT_RETURNTRANSFER, true);                                 
             curl_setopt($request, CURLOPT_FOLLOWLOCATION, true);
-            $response = curl_exec($request); // execute
+            $response = curl_exec($request); 
             $response = json_decode($response);
 
             // Building table.
             // **ASSUMPTION** : $response will always return results. Would implement a fallback if this was not the case.
-            $content = '<table id="nfl_teams_list_table" class="display" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Nickname</th>
-                        <th>Conference</th>  
-                        <th>Division</th>
-                    </tr>
-                </thead>
-            <tbody>';
+            $content = '
+                <div class="nfl-listing-table" >' . (!empty($title) ? '<h4>' . $title . '</h4>' : '' ) . '
+                    <table id="nfl_teams_list_table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Nickname</th>
+                                <th>Conference</th>  
+                                <th>Division</th>
+                            </tr>
+                        </thead>
+                    <tbody>';
 
             foreach ($response->results->data->team as $key => $team) {
                 $content .= '<tr>
@@ -176,15 +221,8 @@ class NFL_Teams_List_Plugin {
             }
 
             $content .= '</tbody>
-                <tfoot>
-                    <tr>
-                        <th>Name</th>
-                        <th>Nickname</th>
-                        <th>Conference</th>
-                        <th>Division</th>
-                    </tr>
-                </tfoot>
-            </table>';
+                </table>
+            </div>';
         }else{
             $content = '<div><p>Uh oh! Looks like you\'re missing an NFL Teams List API key. Please go to the plugin settings page to update your settings.</p></div>';
         }        
