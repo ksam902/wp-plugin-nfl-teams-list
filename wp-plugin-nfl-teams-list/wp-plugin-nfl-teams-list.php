@@ -10,17 +10,19 @@
 class NFL_Teams_List_Plugin {
 
     private $api_key;
+    private $api_response;
 
     /**
     * Constructor. Called when the plugin is initialised.
     */
-    function __construct() {
+    function __construct($api_response = array()) {
         add_action('wp_enqueue_scripts', array(  $this, 'nfl_teams_list_scripts'));
         add_action( 'admin_init', array(  $this, 'nfl_teams_list_settings_init' ));
         add_action( 'admin_menu', array(  $this, 'nfl_teams_list_options_page' ));
         add_shortcode('nfl_listing', array(  $this, 'shortcode_nfl_listing'));
 
         $this->api_key = get_option('nfl_listing_settings_api_key');
+        $this->api_response = $api_response;
     }
 
     function nfl_teams_list_scripts() {
@@ -38,6 +40,14 @@ class NFL_Teams_List_Plugin {
 
         wp_register_script( 'nfl_teams_list_script', plugins_url('wp-plugin-nfl-teams-list.js',__FILE__ ));
         wp_enqueue_script('nfl_teams_list_script');
+
+        $script_params = array(
+                   /* examples */
+                   'post' => 99,
+                   'users' => array( 1, 20, 2049 )
+               );
+
+               wp_localize_script( 'nfl_teams_list_script', 'scriptParams', $script_params );
     }
 
 
@@ -171,27 +181,39 @@ class NFL_Teams_List_Plugin {
 
 
 
-        // var_dump($this->api_key);
+        // var_dump($this->api_response->results->data->team);
         // die('here');
+
         if (!empty($this->api_key)) {       
             $content = '
                 <table id="nfl_listing_table" class="display" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>Display Name</th>
-                        <th>Nickname</th>
-                        <th>Conference</th>
-                        <th>Division</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>Display Name</th>
-                        <th>Nickname</th>
-                        <th>Conference</th>
-                        <th>Division</th>
-                    </tr>
-                </tfoot>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Nickname</th>
+                            <th>Conference</th>  
+                            <th>Division</th>
+                        </tr>
+                    </thead>
+                    <tbody>';
+
+                foreach ($this->api_response->results->data->team as $key => $team) {
+                    $content .= '<tr>
+                        <td>' . $team->display_name . '</td>
+                        <td>' . $team->nickname . '</td>
+                        <td>' . $team->conference . '</td>
+                        <td>' . $team->division . '</td>  
+                    </tr>';
+                }
+            $content .= '</tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Name</th>
+                            <th>Nickname</th>
+                            <th>Conference</th>
+                            <th>Division</th>
+                        </tr>
+                    </tfoot>
                 </table>
             ';
         }else{
@@ -202,26 +224,13 @@ class NFL_Teams_List_Plugin {
     }
 }
 
-$nfl_teams_list = new NFL_Teams_List_Plugin;
+$request = curl_init('http://delivery.chalk247.com/team_list/NFL.JSON?api_key=74db8efa2a6db279393b433d97c2bc843f8e32b0');                                                                      
+curl_setopt($request, CURLOPT_CUSTOMREQUEST, "GET");
+curl_setopt($request, CURLOPT_POSTREDIR, 3);                                                                  
+curl_setopt($request, CURLOPT_RETURNTRANSFER, true);                                 
+curl_setopt($request, CURLOPT_FOLLOWLOCATION, true); // follow http 3xx redirects
+$response = curl_exec($request); // execute
+$response = json_decode($response);
+  
+$nfl_teams_list = new NFL_Teams_List_Plugin($response);
 
-
-// DEV-NOTE : TODO 
-
-// $ch = curl_init('https://delivery.chalk247.com/team_list/NFL.JSON?api_key=74db8efa2a6db279393b433d97c2bc843f8e32b0');                                                                      
-//     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-//     curl_setopt($ch, CURLOPT_POSTREDIR, 3);                                                                  
-//     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);                                 
-//     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // follow http 3xx redirects
-//     $resp_orders = curl_exec($ch); // execute
-
-//     // echo '<h2>API Response</h2>';
-//     print_r($resp_orders);
-
-//     $jd_orders = json_decode($resp_orders);
-
-//     // echo '<h2>JSON Decoded Response</h2>';
-//     // echo '<pre>';
-//     print_r($jd_orders);
-//     // echo '</pre>'; 
-
-//     die('here');
