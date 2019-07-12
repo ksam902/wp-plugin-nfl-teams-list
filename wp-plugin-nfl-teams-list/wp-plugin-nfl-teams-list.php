@@ -18,9 +18,9 @@ class NFL_Teams_List_Plugin {
         add_action('wp_enqueue_scripts', array(  $this, 'nfl_teams_list_scripts'));
         add_action( 'admin_init', array(  $this, 'nfl_teams_list_settings_init' ));
         add_action( 'admin_menu', array(  $this, 'nfl_teams_list_options_page' ));
-        add_shortcode('nfl_listing', array(  $this, 'shortcode_nfl_listing'));
+        add_shortcode('nfl_teams_list', array(  $this, 'shortcode_nfl_teams_list'));
 
-        $this->api_key = get_option('nfl_listing_settings_api_key');
+        $this->api_key = get_option('nfl_teams_list_settings_api_key');
     }
 
     function nfl_teams_list_scripts() {
@@ -136,7 +136,7 @@ class NFL_Teams_List_Plugin {
     * @param array $atta array of shortcode properties.
     * @return string Rendered shortcode.
     */
-    function shortcode_nfl_listing($atts, $content = null){
+    function shortcode_nfl_teams_list($atts, $content = null){
         extract( shortcode_atts( array(
             'id'       => 'id',
         ), $atts ) );
@@ -155,7 +155,7 @@ class NFL_Teams_List_Plugin {
 
             // Building table.
             // **ASSUMPTION** : $response will always return results. Would implement a fallback if this was not the case.
-            $content = '<table id="nfl_listing_table" class="display" style="width:100%">
+            $content = '<table id="nfl_teams_list_table" class="display" style="width:100%">
                 <thead>
                     <tr>
                         <th>Name</th>

@@ -1,5 +1,5 @@
 (function() {
     $(document).ready( function () {
-        $('#nfl_listing_table').DataTable();  
+        $('#nfl_teams_list_table').DataTable();  
     } );
 })();
