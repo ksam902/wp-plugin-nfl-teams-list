@@ -6,7 +6,7 @@ A WordPress plugin that displays a list of NFL teams in a Datatable. The Datatab
 
 These instructions will get you a copy of the project up and running on your local machine for testing purposes.
 
-# Installing the Plugin
+### Installing the Plugin
 
 * Download a zip, or clone this repository.
 * Copy the `wp-plugin-nfl-teams-list` directory into the `/wp-content/plugins/` directory of your WordPress installation.
@@ -15,7 +15,7 @@ These instructions will get you a copy of the project up and running on your loc
 * Enter a valid API key (example: `74db8efa2a6db279393b433d97c2bc843f8e32b0`).
 * Save.
 
-# Using the Shortcode
+### Using the Shortcode
 
 To use the custom `nfl_teams_list` shortcode enter `[nfl_teams_list/]` into your content and save your changes. The shortcode also accepts parameters which are listed below.
 
