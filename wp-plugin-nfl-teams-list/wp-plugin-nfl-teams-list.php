@@ -15,10 +15,10 @@ class NFL_Teams_List_Plugin {
     * Constructor. Called when the plugin is initialised.
     */
     function __construct() {
-        add_action('wp_enqueue_scripts', array(  $this, 'nfl_teams_list_scripts'));
-        add_action( 'admin_init', array(  $this, 'nfl_teams_list_settings_init' ));
-        add_action( 'admin_menu', array(  $this, 'nfl_teams_list_options_page' ));
-        add_shortcode('nfl_teams_list', array(  $this, 'shortcode_nfl_teams_list'));
+        add_action('wp_enqueue_scripts', array($this, 'nfl_teams_list_scripts'));
+        add_action('admin_init', array($this, 'nfl_teams_list_settings_init' ));
+        add_action('admin_menu', array($this, 'nfl_teams_list_options_page' ));
+        add_shortcode('nfl_teams_list', array($this, 'shortcode_nfl_teams_list'));
 
         $this->api_key = get_option('nfl_teams_list_settings_api_key');
     }
@@ -186,7 +186,7 @@ class NFL_Teams_List_Plugin {
                 </tfoot>
             </table>';
         }else{
-            $content = '<div><p>Uh oh! Looks like you\'re missing an API key. Please go to the plugin settings page to update your API key.</p></div>';
+            $content = '<div><p>Uh oh! Looks like you\'re missing an NFL Teams List API key. Please go to the plugin settings page to update your settings.</p></div>';
         }        
         
         return $content;
