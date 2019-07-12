@@ -10,19 +10,17 @@
 class NFL_Teams_List_Plugin {
 
     private $api_key;
-    private $api_response;
 
     /**
     * Constructor. Called when the plugin is initialised.
     */
-    function __construct($api_response = array()) {
+    function __construct() {
         add_action('wp_enqueue_scripts', array(  $this, 'nfl_teams_list_scripts'));
         add_action( 'admin_init', array(  $this, 'nfl_teams_list_settings_init' ));
         add_action( 'admin_menu', array(  $this, 'nfl_teams_list_options_page' ));
         add_shortcode('nfl_listing', array(  $this, 'shortcode_nfl_listing'));
 
         $this->api_key = get_option('nfl_listing_settings_api_key');
-        $this->api_response = $api_response;
     }
 
     function nfl_teams_list_scripts() {
@@ -155,10 +153,8 @@ class NFL_Teams_List_Plugin {
             $response = curl_exec($request); // execute
             $response = json_decode($response);
 
-            $this->api_response = $response;
-
             // Building table.
-            // **ASSUMPTION** : $this->api_response will always return results. Would implement a fallback if this was not the case.
+            // **ASSUMPTION** : $response will always return results. Would implement a fallback if this was not the case.
             $content = '<table id="nfl_listing_table" class="display" style="width:100%">
                 <thead>
                     <tr>
@@ -170,7 +166,7 @@ class NFL_Teams_List_Plugin {
                 </thead>
             <tbody>';
 
-            foreach ($this->api_response->results->data->team as $key => $team) {
+            foreach ($response->results->data->team as $key => $team) {
                 $content .= '<tr>
                     <td>' . $team->display_name . '</td>
                     <td>' . $team->nickname . '</td>
