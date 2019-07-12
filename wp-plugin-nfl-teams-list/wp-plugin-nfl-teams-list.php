@@ -3,71 +3,70 @@
  * Plugin Name: NFL Teams List
  * Version: 1.0
  * Author: Kyle Samson
- * Description: A plugin that displays a list of NFL teams in a datatable. The datatable is rendered using a shortcode.
- * License: GPL2
+ * Description: A WordPress plugin that displays a list of NFL teams in a Datatable using a custom shortcode.
 */
 
 class NFL_Teams_List_Plugin {
 
     private $api_key;
+    private $style;
 
     /**
     * Constructor. Called when the plugin is initialised.
     */
     function __construct() {
-        add_action('wp_enqueue_scripts', array($this, 'nfl_teams_list_scripts'));
-        add_action('admin_init', array($this, 'nfl_teams_list_settings_init' ));
-        add_action('admin_menu', array($this, 'nfl_teams_list_options_page' ));
-        add_shortcode('nfl_teams_list', array($this, 'shortcode_nfl_teams_list'));
+        add_action('wp_enqueue_scripts', array($this, 'nfl_teams_list_scripts'));// Load assets
+        add_action('admin_init', array($this, 'nfl_teams_list_settings_init' ));// Create Settings section
+        add_action('admin_menu', array($this, 'nfl_teams_list_options_page' ));// Create Options page
+        add_shortcode('nfl_teams_list', array($this, 'shortcode_nfl_teams_list'));// Register custom shortcode
 
         $this->api_key = get_option('nfl_teams_list_settings_api_key');
+        $this->style = get_option('nfl_teams_list_settings_css');
     }
 
+    /**
+     * Register & Enqueue Assets
+     */
     function nfl_teams_list_scripts() {   
-
-        
-
-        wp_register_style( 'nfl_teams_list_datatables_css', 'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css' );
-        wp_enqueue_style( 'nfl_teams_list_datatables_css' );
-
+        // jQuery
         wp_enqueue_style( 'nfl_teams_list_jquery' );
         wp_enqueue_script( 'nfl_teams_list_jquery', 'https://code.jquery.com/jquery-3.3.1.js', array( 'jquery' ) );
-
+        // jQuery Datatables
         wp_register_script( 'nfl_teams_list_datatables_js', 'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js');
         wp_enqueue_script('nfl_teams_list_datatables_js');
+        
+        if ($this->style === 'bootstrap') { // only register Bootstrap assets if Bootstrap styling has been chosen. 
+            // Bootstrap CSS
+            wp_register_style( 'nfl_teams_list_bootstrap', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css' );
+            wp_enqueue_style( 'nfl_teams_list_bootstrap' );
+            // Datatables/Bootstrap CSS
+            wp_register_style( 'nfl_teams_list_bootstrap_datatables', 'https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css' );
+            wp_enqueue_style( 'nfl_teams_list_bootstrap_datatables' );
 
-        // BOOTSTRAP
-        // wp_register_style( 'nfl_teams_list_bootstrap', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css' );
-        // wp_enqueue_style( 'nfl_teams_list_bootstrap' );
+            wp_register_script( 'nfl_teams_list_bootstrap_js', 'https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js');
+            wp_enqueue_script('nfl_teams_list_bootstrap_js');
+        }else{
+            // Datatables CSS
+            wp_register_style( 'nfl_teams_list_datatables_css', 'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css' );
+            wp_enqueue_style( 'nfl_teams_list_datatables_css' );
+        }
 
-        // wp_register_style( 'nfl_teams_list_bootstrap_datatables', 'https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css' );
-        // wp_enqueue_style( 'nfl_teams_list_bootstrap_datatables' );
-
-        // wp_register_script( 'nfl_teams_list_popper_js', 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js');
-        // wp_enqueue_script('nfl_teams_list_popper_js');
-
-        // wp_register_script( 'nfl_teams_list_bootstrap_js', 'https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js');
-        // wp_enqueue_script('nfl_teams_list_bootstrap_js');
-
-
-
-        // Custom CSS file.
+        // Custom CSS
         wp_register_style( 'nfl_teams_list_style_css', plugins_url('wp-plugin-nfl-teams-list.css',__FILE__ ) );
         wp_enqueue_style( 'nfl_teams_list_style_css' );
-
-        // Custom JS file.
+        // Custom JS file
         wp_register_script( 'nfl_teams_list_script_js', plugins_url('wp-plugin-nfl-teams-list.js',__FILE__ ));
         wp_enqueue_script('nfl_teams_list_script_js');
-       
     }
-
 
     /**
      * Plugin Settings and Sections
      */
     function nfl_teams_list_settings_init() {
-        // register a new setting and a new section for "nfl_teams_list" page
+        // register new settings and a new section for "nfl_teams_list" page
         register_setting( 'nfl_teams_list', 'nfl_teams_list_settings_api_key' );
+        register_setting( 'nfl_teams_list', 'nfl_teams_list_settings_css' );
+
         add_settings_section(
             'nfl_teams_list_setting_section',
             '',
@@ -84,26 +83,51 @@ class NFL_Teams_List_Plugin {
             'nfl_teams_list_setting_section',
             [ 'label_for' => 'nfl_teams_list_field_api_key' ]
         );
+
+        // register a new field in the "nfl_teams_list_setting_section" section, inside the "nfl_teams_list" page
+        add_settings_field(
+            'nfl_teams_list_field_css', 
+            __( 'CSS', 'nfl_teams_list' ),
+            array( $this, 'nfl_teams_list_field_css_callback'),
+            'nfl_teams_list',
+            'nfl_teams_list_setting_section',
+            ['label_for' => 'nfl_teams_list_field_css']
+        );
     }
      
     /**
      * Add helper text to Settings Section.
      */
-    function nfl_teams_list_setting_section_callback( $args ) {
+    function nfl_teams_list_setting_section_callback() {
         ?>
             <p>Please provide an API key to successfully display the list of NFL teams.</p>
         <?php
     }
      
-     
     /**
      * Add API key input Settings field.
      */
     function nfl_teams_list_field_api_key_callback( $args ) {
-        // get stored api key value.
-        $api_key = esc_attr(get_option('nfl_teams_list_settings_api_key', '')); 
+        $api_key = esc_attr(get_option('nfl_teams_list_settings_api_key', ''));// get stored api key value.
         ?>
             <input type="text" id="<?php echo esc_attr( $args['label_for'] ); ?>" name="nfl_teams_list_settings_api_key"  value="<?php echo $api_key; ?>"/>
+        <?php
+    }
+
+    /**
+     * Add CSS select Settings field.
+     */
+    function nfl_teams_list_field_css_callback( $args ) {
+        $style = get_option( 'nfl_teams_list_settings_css' );// get stored style value.
+        ?>
+            <select id="<?php echo esc_attr( $args['label_for'] ); ?>" name="nfl_teams_list_settings_css">
+                <option value="default" <?php echo isset( $style ) ? ( selected( $style, 'default', false ) ) : ( '' ); ?>>
+                    <?php esc_html_e( 'Default', 'nfl_teams_list' ); ?>
+                </option>
+                <option value="bootstrap" <?php echo isset( $style ) ? ( selected( $style, 'bootstrap', false ) ) : ( '' ); ?>>
+                    <?php esc_html_e( 'Bootstrap', 'nfl_teams_list' ); ?>
+                </option>
+            </select>
         <?php
     }
      
@@ -150,43 +174,38 @@ class NFL_Teams_List_Plugin {
     }
 
     /**
-    * Add custom shortcode used for NFL API Results.
+    * Add custom shortcode used for NFL API Response.
     *
     * @param array $atta array of shortcode properties.
     * @return string Rendered shortcode.
     */
     function shortcode_nfl_teams_list($atts, $content = null){
+        // Get shortcode paramters
         extract( shortcode_atts( array(
             'title'       => 'title',
-            'style'       => 'style'
+            'subtitle'    => 'subtitle'
         ), $atts ) );
 
         $title = esc_attr($title);
-        $style = esc_attr($style);
-
-
-        // DEV-NOTE REMOVE
-
-
-        // if (empty($style)) {
-        //     $style = 'default';
-        // }
-
-        // $available_styles = array(
-        //     'bootstrap' => array(
-        //         'table-class' => 'class="table table-striped table-bordered" style="width:100%"'
-        //     ),
-        //     'default' => array(
-        //         'table-class' => 'class="" style="width:100%"'
-        //     )
-        // );
-   
-
-        // var_dump($available_styles[$style]["table-class"]);
-        // die('die');
+        $subtitle = esc_attr($subtitle);
 
         if (!empty($this->api_key)) {       
+            $available_styles = array(
+                'default' => array(
+                    'div-class'     =>  'nfl-listing-div',
+                    'table-class'   =>  '',
+                    'thead-class'   =>  ''
+                ),
+                'bootstrap' => array(
+                    'div-class' => 'table-responsive',
+                    'table-class'   =>  'table table-hover table-borderless',
+                    'thead-class'   =>  'thead-light'
+                )
+            );
+            // Use $style to apply to correct table styling based on the value of CSS in the plugin Settings page ($this->style) 
+            $style = $available_styles[$this->style];
 
+            // Fetch the NFL teams using the provided API URL
             $request = curl_init('http://delivery.chalk247.com/team_list/NFL.JSON?api_key=' . $this->api_key);                                                                      
             curl_setopt($request, CURLOPT_CUSTOMREQUEST, "GET");
             curl_setopt($request, CURLOPT_ENCODING, '');
@@ -199,9 +218,11 @@ class NFL_Teams_List_Plugin {
             // Building table.
             // **ASSUMPTION** : $response will always return results. Would implement a fallback if this was not the case.
             $content = '
-                <div class="nfl-listing-table" >' . (!empty($title) ? '<h4>' . $title . '</h4>' : '' ) . '
-                    <table id="nfl_teams_list_table">
-                        <thead>
+                <div class="' . $style['div-class'] . '">' 
+                    . (!empty($title) ? '<h4>' . $title . '</h4>' : '' ) 
+                    . (!empty($subtitle) ? '<p><small>' . $subtitle . '</small></p>' : '' ) 
+                    . '<table id="nfl_teams_list_table" class="' . $style['table-class'] . '">
+                        <thead class="' . $style['thead-class'] . '">
                             <tr>
                                 <th>Name</th>
                                 <th>Nickname</th>
@@ -224,12 +245,12 @@ class NFL_Teams_List_Plugin {
                 </table>
             </div>';
         }else{
+            // Handle situation when no API key is provided.
             $content = '<div><p>Uh oh! Looks like you\'re missing an NFL Teams List API key. Please go to the plugin settings page to update your settings.</p></div>';
         }        
-        
+
         return $content;
     }
 }
   
 $nfl_teams_list = new NFL_Teams_List_Plugin();
-
