@@ -22,7 +22,7 @@ To use the custom `nfl_teams_list` shortcode enter `[nfl_teams_list/]` into your
 Valid shortcode parameters:
 
 * `title` (string) - optional string value, if provided a title will appear above the Datatable displaying the provided text.
-* `subtitle` (string) - optional string value, if provided a subtitle will appear above the Datatable (and below the `title`, if provided) displaying the provided text.
+* `subtitle` (string) - optional string value, if provided a subtitle will appear above the Datatable (and below the `title`) displaying the provided text.
 
 Example: `[nfl_teams_list title="NFL Teams" subtitle="Feel free to use the search functionality or sort the table columns to find the team you are looking for."/]` 
 
