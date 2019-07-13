@@ -28,7 +28,8 @@ Example: `[nfl_teams_list title="NFL Teams" subtitle="Feel free to use the searc
 
 ## Assumptions
 
-TODO
+* The API will always return something.
+* Users are\'t putting special characters into the shortcode parameters.
 
 ## Built With
 
