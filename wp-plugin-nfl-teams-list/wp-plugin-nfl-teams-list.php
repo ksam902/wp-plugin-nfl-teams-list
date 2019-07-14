@@ -9,6 +9,7 @@
 // DEV-NOTE: Decided to build a WordPress plugin so that the functionality it provides can be easily added to multiple WordPress installations.
 class NFL_Teams_List_Plugin {
 
+    private $api_url;
     private $api_key;
     private $css;
 
@@ -23,6 +24,7 @@ class NFL_Teams_List_Plugin {
         // Decided to create a custom shortcode because it allows the user to easily display the NFL Teams List on a page, or a number of pages.
         add_shortcode('nfl_teams_list', array($this, 'shortcode_nfl_teams_list'));// Register custom shortcode
 
+        $this->api_url = 'http://delivery.chalk247.com/team_list/NFL.JSON';
         // Decided to require a user provided API key because this may be something that is unique to each WordPress/Plugin installation.
         $this->api_key = get_option('nfl_teams_list_settings_api_key');
         // Decided to provide the user with a CSS settings option to further highlight how a WordPress plugin can be configured. 
@@ -43,7 +45,7 @@ class NFL_Teams_List_Plugin {
         wp_enqueue_script('nfl_teams_list_datatables_js');
         
         if ($this->css === 'bootstrap') { // only register Bootstrap assets if Bootstrap CSS option has been chosen.
-            // Decided to provide Bootstrap as a styling option because it provided basic, responsive styling "out of the box". 
+            // Decided to include Bootstrap as a styling option because it provides basic, responsive styling "out of the box". 
             // Bootstrap CSS
             wp_register_style('nfl_teams_list_bootstrap', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css');
             wp_enqueue_style('nfl_teams_list_bootstrap');
@@ -217,18 +219,13 @@ class NFL_Teams_List_Plugin {
             // Use $css to apply to correct table styling based on the value of CSS in the plugin Settings page ($this->css) 
             $css = $available_css[$this->css];
 
-            // Fetch the NFL teams using the provided API URL using curl
-            $request = curl_init('http://delivery.chalk247.com/team_list/NFL.JSON?api_key=' . $this->api_key);                                                                      
-            curl_setopt($request, CURLOPT_CUSTOMREQUEST, "GET");
-            curl_setopt($request, CURLOPT_ENCODING, '');
-            curl_setopt($request, CURLOPT_POSTREDIR, 3);                                                                  
-            curl_setopt($request, CURLOPT_RETURNTRANSFER, true);                                 
-            curl_setopt($request, CURLOPT_FOLLOWLOCATION, true);
-            $response = curl_exec($request); 
-            $response = json_decode($response);
+            // Fetch the NFL Teams
+            $url = $this->api_url . '?api_key=' . $this->api_key;
+            $api_response = file_get_contents($url);
+            $api_response = json_decode($api_response);
 
             // Building table.
-            // **ASSUMPTION** : $response will always return the list of NFL Teams in the same format with the same properties.
+            // **ASSUMPTION** : $api_response will always return the list of NFL Teams in the same format with the same properties.
             $content = '
                 <div class="base ' . $css['div-class'] . '">' 
                     . (!empty($title) ? '<h4>' . $title . '</h4>' : '') 
@@ -244,7 +241,7 @@ class NFL_Teams_List_Plugin {
                         </thead>
                     <tbody class="' . $css['tbody-class'] . '">';
 
-            foreach ($response->results->data->team as $key => $team) {
+            foreach ($api_response->results->data->team as $key => $team) {
                 $content .= '<tr>
                     <td>' . $team->display_name . '</td>
                     <td>' . $team->nickname . '</td>
