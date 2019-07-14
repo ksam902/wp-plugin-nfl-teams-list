@@ -13,6 +13,7 @@ div#nfl_teams_list_table_filter > label > input[type="search"]{
 	padding: 0px;
 }
 
+/* Custom CSS for 'Default' styling */
 table.nfl-listing-table { 
 	border-collapse:collapse !important
 }

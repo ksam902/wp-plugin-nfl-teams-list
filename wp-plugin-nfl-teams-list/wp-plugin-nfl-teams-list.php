@@ -42,7 +42,7 @@ class NFL_Teams_List_Plugin {
             // Datatables/Bootstrap CSS
             wp_register_style('nfl_teams_list_bootstrap_datatables', 'https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css');
             wp_enqueue_style('nfl_teams_list_bootstrap_datatables');
-
+            // Datatables/Bootstrap JS
             wp_register_script('nfl_teams_list_bootstrap_js', 'https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js');
             wp_enqueue_script('nfl_teams_list_bootstrap_js');
         }else{
@@ -182,10 +182,10 @@ class NFL_Teams_List_Plugin {
     function shortcode_nfl_teams_list($atts, $content = null){
         // Get shortcode paramters
         // **ASSUMPTION** : Users will not insert special characters into the shortcode parameters.
-        extract( shortcode_atts( array(
+        extract(shortcode_atts(array(
             'title'       => 'title',
             'subtitle'    => 'subtitle'
-        ), $atts ) );
+        ), $atts));
 
         $title = esc_attr($title);
         $subtitle = esc_attr($subtitle);
@@ -208,7 +208,7 @@ class NFL_Teams_List_Plugin {
             // Use $css to apply to correct table styling based on the value of CSS in the plugin Settings page ($this->css) 
             $css = $available_css[$this->css];
 
-            // Fetch the NFL teams using the provided API URL
+            // Fetch the NFL teams using the provided API URL using curl
             $request = curl_init('http://delivery.chalk247.com/team_list/NFL.JSON?api_key=' . $this->api_key);                                                                      
             curl_setopt($request, CURLOPT_CUSTOMREQUEST, "GET");
             curl_setopt($request, CURLOPT_ENCODING, '');
