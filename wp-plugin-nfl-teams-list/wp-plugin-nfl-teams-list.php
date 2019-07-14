@@ -6,6 +6,7 @@
  * Description: A WordPress plugin that displays a list of NFL teams in a Datatable using a custom shortcode.
 */
 
+// DEV-NOTE: Decided to build a WordPress plugin so that the functionality it provides can be easily added to multiple WordPress installations.
 class NFL_Teams_List_Plugin {
 
     private $api_key;
@@ -18,9 +19,13 @@ class NFL_Teams_List_Plugin {
         add_action('wp_enqueue_scripts', array($this, 'nfl_teams_list_scripts'));// Load assets
         add_action('admin_init', array($this, 'nfl_teams_list_settings_init'));// Create Settings section
         add_action('admin_menu', array($this, 'nfl_teams_list_options_page'));// Create Options page
+
+        // Decided to create a custom shortcode because it allows the user to easily display the NFL Teams List on a page, or a number of pages.
         add_shortcode('nfl_teams_list', array($this, 'shortcode_nfl_teams_list'));// Register custom shortcode
 
+        // Decided to require a user provided API key because this may be something that is unique to each WordPress/Plugin installation.
         $this->api_key = get_option('nfl_teams_list_settings_api_key');
+        // Decided to provide the user with a CSS settings option to further highlight how a WordPress plugin can be configured. 
         $this->css = get_option('nfl_teams_list_settings_css');
     }
 
@@ -31,11 +36,14 @@ class NFL_Teams_List_Plugin {
         // jQuery
         wp_enqueue_style('nfl_teams_list_jquery');
         wp_enqueue_script('nfl_teams_list_jquery', 'https://code.jquery.com/jquery-3.3.1.js', array('jquery') );
+
+        // Decided to list the NFL teams in a Datatable because search, pagination and sorting are useful functionalities provided "out of the box".
         // jQuery Datatables
         wp_register_script('nfl_teams_list_datatables_js', 'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js');
         wp_enqueue_script('nfl_teams_list_datatables_js');
         
-        if ($this->css === 'bootstrap') { // only register Bootstrap assets if Bootstrap CSS option has been chosen. 
+        if ($this->css === 'bootstrap') { // only register Bootstrap assets if Bootstrap CSS option has been chosen.
+            // Decided to provide Bootstrap as a styling option because it provided basic, responsive styling "out of the box". 
             // Bootstrap CSS
             wp_register_style('nfl_teams_list_bootstrap', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css');
             wp_enqueue_style('nfl_teams_list_bootstrap');
@@ -182,6 +190,7 @@ class NFL_Teams_List_Plugin {
     function shortcode_nfl_teams_list($atts, $content = null){
         // Get shortcode paramters
         // **ASSUMPTION** : Users will not insert special characters into the shortcode parameters.
+        // Decided to allow some basic shortcode parameters to highlight how shortcode parameters can be used.
         extract(shortcode_atts(array(
             'title'       => 'title',
             'subtitle'    => 'subtitle'

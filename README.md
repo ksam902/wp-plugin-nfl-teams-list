@@ -28,7 +28,7 @@ Example: `[nfl_teams_list title="NFL Teams" subtitle="Feel free to use the searc
 
 ## Assumptions
 
-* The API will always return something.
+* The API will always return the list of NFL Teams in the same format with the same properties.
 * Users will not insert special characters into the shortcode parameters.
 
 ## Built With
