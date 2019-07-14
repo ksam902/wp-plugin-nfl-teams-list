@@ -1,6 +1,6 @@
 # NFL Teams List - WordPress Plugin
 
-A WordPress plugin that displays a list of NFL teams in a Datatable. The Datatable can be included in any page using a custom shortcode. The plugin includes a Settings page where a user can provide the plugin with an API key used to fetch the NFL teams and set the styling for the Datatable.
+A WordPress plugin that displays a list of NFL teams in a Datatable. The Datatable can be included in any page using a custom shortcode. The plugin includes a Settings page where a user can provide the plugin with an API key used to fetch the NFL teams and set the styling for the shortcode output.
 
 ## Getting Started
 
@@ -29,7 +29,7 @@ Example: `[nfl_teams_list title="NFL Teams" subtitle="Feel free to use the searc
 ## Assumptions
 
 * The API will always return something.
-* Users will not put special characters into the shortcode parameters.
+* Users will not insert special characters into the shortcode parameters.
 
 ## Built With
 
