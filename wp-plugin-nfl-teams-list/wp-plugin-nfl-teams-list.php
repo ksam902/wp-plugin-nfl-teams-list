@@ -9,7 +9,7 @@
 class NFL_Teams_List_Plugin {
 
     private $api_key;
-    private $style;
+    private $css;
 
     /**
     * Constructor. Called when the plugin is initialised.
@@ -21,7 +21,7 @@ class NFL_Teams_List_Plugin {
         add_shortcode('nfl_teams_list', array($this, 'shortcode_nfl_teams_list'));// Register custom shortcode
 
         $this->api_key = get_option('nfl_teams_list_settings_api_key');
-        $this->style = get_option('nfl_teams_list_settings_css');
+        $this->css = get_option('nfl_teams_list_settings_css');
     }
 
     /**
@@ -35,7 +35,7 @@ class NFL_Teams_List_Plugin {
         wp_register_script( 'nfl_teams_list_datatables_js', 'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js');
         wp_enqueue_script('nfl_teams_list_datatables_js');
         
-        if ($this->style === 'bootstrap') { // only register Bootstrap assets if Bootstrap styling has been chosen. 
+        if ($this->css === 'bootstrap') { // only register Bootstrap assets if Bootstrap styling has been chosen. 
             // Bootstrap CSS
             wp_register_style( 'nfl_teams_list_bootstrap', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css' );
             wp_enqueue_style( 'nfl_teams_list_bootstrap' );
@@ -118,13 +118,13 @@ class NFL_Teams_List_Plugin {
      * Add CSS select Settings field.
      */
     function nfl_teams_list_field_css_callback( $args ) {
-        $style = get_option( 'nfl_teams_list_settings_css' );// get stored style value.
+        $css = get_option( 'nfl_teams_list_settings_css' );// get stored css value.
         ?>
             <select id="<?php echo esc_attr( $args['label_for'] ); ?>" name="nfl_teams_list_settings_css">
-                <option value="default" <?php echo isset( $style ) ? ( selected( $style, 'default', false ) ) : ( '' ); ?>>
+                <option value="default" <?php echo isset( $css ) ? ( selected( $css, 'default', false ) ) : ( '' ); ?>>
                     <?php esc_html_e( 'Default', 'nfl_teams_list' ); ?>
                 </option>
-                <option value="bootstrap" <?php echo isset( $style ) ? ( selected( $style, 'bootstrap', false ) ) : ( '' ); ?>>
+                <option value="bootstrap" <?php echo isset( $css ) ? ( selected( $css, 'bootstrap', false ) ) : ( '' ); ?>>
                     <?php esc_html_e( 'Bootstrap', 'nfl_teams_list' ); ?>
                 </option>
             </select>
@@ -190,20 +190,22 @@ class NFL_Teams_List_Plugin {
         $subtitle = esc_attr($subtitle);
 
         if (!empty($this->api_key)) {       
-            $available_styles = array(
+            $available_css = array(
                 'default' => array(
                     'div-class'     =>  'nfl-listing-div',
-                    'table-class'   =>  '',
-                    'thead-class'   =>  ''
+                    'table-class'   =>  'nfl-listing-table',
+                    'thead-class'   =>  'nfl-listing-thead',
+                    'tbody-class'   =>  'nfl-listing-tbody'
                 ),
                 'bootstrap' => array(
                     'div-class' => 'table-responsive',
                     'table-class'   =>  'table table-hover table-borderless',
-                    'thead-class'   =>  'thead-light'
+                    'thead-class'   =>  'thead-light',
+                    'tbody-class'   =>  ''
                 )
             );
-            // Use $style to apply to correct table styling based on the value of CSS in the plugin Settings page ($this->style) 
-            $style = $available_styles[$this->style];
+            // Use $css to apply to correct table styling based on the value of CSS in the plugin Settings page ($this->css) 
+            $css = $available_css[$this->css];
 
             // Fetch the NFL teams using the provided API URL
             $request = curl_init('http://delivery.chalk247.com/team_list/NFL.JSON?api_key=' . $this->api_key);                                                                      
@@ -218,11 +220,11 @@ class NFL_Teams_List_Plugin {
             // Building table.
             // **ASSUMPTION** : $response will always return results. Would implement a fallback if this was not the case.
             $content = '
-                <div class="' . $style['div-class'] . '">' 
+                <div class="base ' . $css['div-class'] . '">' 
                     . (!empty($title) ? '<h4>' . $title . '</h4>' : '' ) 
                     . (!empty($subtitle) ? '<p><small>' . $subtitle . '</small></p>' : '' ) 
-                    . '<table id="nfl_teams_list_table" class="' . $style['table-class'] . '">
-                        <thead class="' . $style['thead-class'] . '">
+                    . '<table id="nfl_teams_list_table" class="' . $css['table-class'] . '">
+                        <thead class="' . $css['thead-class'] . '">
                             <tr>
                                 <th>Name</th>
                                 <th>Nickname</th>
@@ -230,7 +232,7 @@ class NFL_Teams_List_Plugin {
                                 <th>Division</th>
                             </tr>
                         </thead>
-                    <tbody>';
+                    <tbody class="' . $css['tbody-class'] . '">';
 
             foreach ($response->results->data->team as $key => $team) {
                 $content .= '<tr>

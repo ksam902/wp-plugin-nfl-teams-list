@@ -1,4 +1,4 @@
-div.nfl-listing-div{
+div.base{
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; 
 	font-size: .75rem;
 }
@@ -6,4 +6,34 @@ div.nfl-listing-div{
 div#nfl_teams_list_table_filter > label > input[type="search"]{
 	border-radius: .5rem !important;
 	margin-bottom: .5rem !important;
+	padding: 0 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button{
+	padding: 0px;
+}
+
+table.nfl-listing-table { 
+	border-collapse:collapse !important
+}
+
+tbody.nfl-listing-tbody > tr:hover {
+	background-color: #f5f5f5;
+}
+
+tbody.nfl-listing-tbody > tr > td {
+   border-right:none !important;
+   border-left:none !important;
+}
+
+tbody.nfl-listing-tbody > tr > td:first-child {
+  font-weight: bold;
+}
+
+thead.nfl-listing-thead > tr > th {
+	border-right:none !important;
+	border-left:none !important;
+	border-top:none !important;
+	background-color: #F95F5F;
+	color: #FEFEFE;
 }
