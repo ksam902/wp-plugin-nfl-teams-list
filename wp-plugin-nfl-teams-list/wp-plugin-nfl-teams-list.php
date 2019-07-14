@@ -219,7 +219,7 @@ class NFL_Teams_List_Plugin {
             $response = json_decode($response);
 
             // Building table.
-            // **ASSUMPTION** : $response will always return results. Would implement a fallback if this was not the case.
+            // **ASSUMPTION** : $response will always return the list of NFL Teams in the same format with the same properties.
             $content = '
                 <div class="base ' . $css['div-class'] . '">' 
                     . (!empty($title) ? '<h4>' . $title . '</h4>' : '') 
